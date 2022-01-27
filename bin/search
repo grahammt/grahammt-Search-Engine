@@ -1,0 +1,28 @@
+#!/bin/bash
+# mapreduce init script
+set -Eeuo pipefail
+
+case $1 in
+    "start")
+        if pgrep -f "flask run --host 0.0.0.0 --port 8000" > /dev/null ; then
+            echo "Error: a process is already using port 8000"
+            exit 1
+        else
+            mkdir -p var/log
+            export FLASK_APP=search
+            export SEARCH_SETTINGS=config.py
+            flask run --host 0.0.0.0 --port 8000 &> var/log/search.log &
+        fi
+        ;;
+
+    "stop")
+        pkill -f 'flask run --host 0.0.0.0 --port 8000'
+        ;;
+    "restart")
+        pkill -f 'flask run --host 0.0.0.0 --port 8000'
+        export FLASK_APP=search
+        export SEARCH_SETTINGS=config.py
+        flask run --host 0.0.0.0 --port 8000 &> var/log/search.log &
+        ;;
+esac
+
